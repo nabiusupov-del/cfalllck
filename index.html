@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Калькулятор</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex;
+    align-items: center; justify-content: center;
+    background: #1e2330; font-family: system-ui, sans-serif;
+  }
+  .calc {
+    width: 300px; padding: 16px; border-radius: 16px;
+    background: #2a3042; box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  }
+  #display {
+    width: 100%; height: 64px; margin-bottom: 12px; padding: 0 12px;
+    border: none; border-radius: 10px; background: #151a26;
+    color: #fff; font-size: 28px; text-align: right;
+  }
+  .keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  button {
+    height: 56px; border: none; border-radius: 10px;
+    background: #3a4259; color: #fff; font-size: 20px; cursor: pointer;
+  }
+  button:hover { background: #4a5470; }
+  button.op { background: #f59e0b; }
+  button.op:hover { background: #fbbf24; }
+  button.eq { background: #22c55e; }
+  button.wide { grid-column: span 2; }
+</style>
+</head>
+<body>
+<div class="calc">
+  <input id="display" value="0" readonly>
+  <div class="keys">
+    <button onclick="clearAll()">C</button>
+    <button onclick="back()">⌫</button>
+    <button class="op" onclick="add('%')">%</button>
+    <button class="op" onclick="add('/')">÷</button>
+    <button onclick="add('7')">7</button>
+    <button onclick="add('8')">8</button>
+    <button onclick="add('9')">9</button>
+    <button class="op" onclick="add('*')">×</button>
+    <button onclick="add('4')">4</button>
+    <button onclick="add('5')">5</button>
+    <button onclick="add('6')">6</button>
+    <button class="op" onclick="add('-')">−</button>
+    <button onclick="add('1')">1</button>
+    <button onclick="add('2')">2</button>
+    <button onclick="add('3')">3</button>
+    <button class="op" onclick="add('+')">+</button>
+    <button class="wide" onclick="add('0')">0</button>
+    <button onclick="add('.')">,</button>
+    <button class="eq" onclick="calc()">=</button>
+  </div>
+</div>
+<script>
+  const d = document.getElementById('display');
+  let fresh = true;
+
+  function add(ch) {
+    const isOp = '+-*/%'.includes(ch);
+    if (fresh && !isOp) d.value = '';
+    fresh = false;
+    if (d.value === '0' && !isOp && ch !== '.') d.value = '';
+    d.value += ch;
+  }
+  function clearAll() { d.value = '0'; fresh = true; }
+  function back() {
+    d.value = d.value.slice(0, -1) || '0';
+  }
+  function calc() {
+    try {
+      const expr = d.value.replace(/(\d+(?:\.\d+)?)%/g, '($1/100)');
+      if (!/^[\d+\-*/().\s]+$/.test(expr)) throw 0;
+      const r = Function('"use strict";return (' + expr + ')')();
+      if (!isFinite(r)) throw 0;
+      d.value = String(+r.toFixed(10));
+    } catch { d.value = 'Ошибка'; }
+    fresh = true;
+  }
+  document.addEventListener('keydown', e => {
+    if (/[\d.+\-*/%]/.test(e.key)) add(e.key);
+    else if (e.key === 'Enter' || e.key === '=') calc();
+    else if (e.key === 'Backspace') back();
+    else if (e.key === 'Escape') clearAll();
+  });
+</script>
+</body>
+</html>
